@@ -1,6 +1,7 @@
 const Twit = require('twit');
 const ObjectsToCsv = require('objects-to-csv');
 require('dotenv').config()
+const Main = require('./mail');
 
 var T = new Twit({
     consumer_key: process.env.API_KEY,
@@ -9,7 +10,7 @@ var T = new Twit({
     access_token_secret: process.env.ACCESS_TOKEN_SECRET
 });
 
-T.get('search/tweets', { q: 'now hiring developer', count:2}, async (err, data, response) => {
+T.get('search/tweets', { q: 'hiring web developer', count:3}, async (err, data, response) => {
     //Twilio authenticaiton
     const accountSid = process.env.ACCOUNT_SID;
     const authToken = process.env.AUTH_TOKEN;
@@ -29,25 +30,29 @@ T.get('search/tweets', { q: 'now hiring developer', count:2}, async (err, data, 
                 tweet_url: `https://twitter.com/${status.user.screen_name}/status/${status.id_str}`
             });
         });
-        const csv = await new ObjectsToCsv(tweets)
-        await csv.toDisk('./tweets.csv', { append: true })
-       
-        client.messages
-          .create({
-              body: `Your tweets are ready for review! Happy job hunting! - ${new Date().toLocaleString()}`,
-              from: '+12055264833',
-              to: '+5016240179'
-          })
-          .then(message => console.log('Message sent: ', message.sid))
+        if(tweets.length <= 0){
+            return console.error('no tweets were found')
+        }
+        // const csv = await new ObjectsToCsv(tweets)
+        // await csv.toDisk('./tweets.csv', { append: true })
+        console.log(tweets)
+        const email = tweets.map(element => {
+            return(
+                `<li> 
+                    <span>Time: ${element.time}</span><br>
+                    <span>Text: ${element.text}</span><br>
+                    <span>Name: ${element.name}</span><br>
+                    <span>Screen name: ${element.screen_name}</span><br>
+                    <span>Link: ${element.tweet_url}<span>
+                 </li>
+                 `
+            ) 
+        })
+        Main(email)
 
     } catch(e) {
-        client.messages
-          .create({
-              body: `Oops! something is wrong - ${new Date().toLocaleString()}`,
-              from: '+12055264833',
-              to: '+5016240179'
-          })
-          .then(message => console.log(message.sid))
+       console.error(e)
     }
 
 });
+
