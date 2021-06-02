@@ -21,8 +21,8 @@ module.exports = async function main(data) {
 
   // send mail with defined transport object
   let info = await transporter.sendMail({
-    from: `"Benjamin Benitez 👻" ${process.env.EMAIL_USER}`, // sender address
-    to: "benitezbenjamin853@gmail.com", // list of receivers
+    from: `" 👻" ${process.env.EMAIL_USER}`, // sender address
+    to: "", // list of receivers
     subject: "job listings", // Subject line
     text: "Hello world?", // plain text body
     html: `<ul>${data}</ul>`, // html body
